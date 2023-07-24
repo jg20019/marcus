@@ -11,18 +11,16 @@
 ;;;;    and so on is constructed. Text is assigned to these blocks but not parsed.
 ;;;;    Link reference definitions are parsed and a map of links is constructed.
 
-(defun convert-to-blocks (path) 
-  (with-open-file (input path :direction :input) 
-    (loop for line = (read-line input nil nil)
-          while line
-          collect (scan-line line))))
-
-(convert-to-blocks #p"example.md")
+(defun match-heading (line) 
+  "Check if line matches ATX heading"
+  (cl-ppcre:scan "^#{1,6}\\s+(\.+)$" line))
 
 (defun scan-line (line) 
   (cond ((match-heading line) (list 'heading line))
         (t 'error)))
 
-(defun match-heading (line) 
-  "Check if line matches ATX heading"
-  (cl-ppcre:scan "^#{1,6}\\s+(\.+)$" line))
+(defun convert-to-blocks (path) 
+  (with-open-file (input path :direction :input) 
+    (loop for line = (read-line input nil nil)
+          while line
+          collect (scan-line line))))
